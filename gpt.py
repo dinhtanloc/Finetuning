@@ -1,44 +1,53 @@
 import streamlit as st
-from PIL import Image
+import openai
+from dotenv import load_dotenv
+import os
 
-def chatbot_response(user_input):
-    # Đây là một ví dụ đơn giản, bạn có thể thay đổi hoặc mở rộng chức năng này
-    if "dog" in user_input.lower():
-        response = "Here's a dog image!"
-        # image_path = "path_to_dog_image.jpg"  # Đường dẫn đến hình ảnh chó
-    elif "cat" in user_input.lower():
-        response = "Here's a cat image!"
-        # image_path = "path_to_cat_image.jpg"  # Đường dẫn đến hình ảnh mèo
-    else:
-        response = "I don't have an image for that."
-        image_path = None
+load_dotenv()
+api_key = os.getenv('API_KEY')
 
-    return response, image_path
+# GPT, phiên bản cũ, pip install openai==0.28
+# Khai báo API key của bạn ở đây
+openai.api_key = api_key
 
-def main():
-    st.title("Chatbox with Image Display")
+def get_gpt_response(prompt):
+    response = openai.ChatCompletion.create(
+      model="your model",  # Bạn có thể thay đổi model tùy thuộc vào nhu cầu của bạn
+      messages=[{"role": "system", "content": "You are cybersecurity specialist. Please answer any question concern about security problem!"}, {"role": "user", "content": prompt}],
+      max_tokens=150
+    )
+    return response['choices'][0]['message']['content'].strip()
 
-    # Khởi tạo danh sách để lưu trữ lịch sử chat
-    chat_history = []
 
-    # Widget để nhập văn bản
-    user_input = st.text_input("You:", "")
+#GPT, phiên bản mới
+from openai import OpenAI
 
-    # Xử lý và hiển thị phản hồi từ chatbot
-    if st.button("Send"):
-        if user_input:
-            response, image_path = chatbot_response(user_input)
-            chat_history.append({"user": user_input, "bot": response, "image": image_path})
+client = OpenAI(
+    api_key = os.getenv('API_KEY'),
+)
 
-    # Hiển thị lịch sử chat
-    for chat in chat_history:
-        st.text_area("You:", value=chat["user"], height=50)
-        st.text_area("Chatbot:", value=chat["bot"], height=50)
-        
-        # Hiển thị hình ảnh nếu có
-        if chat["image"]:
-            image = Image.open(chat["image"])
-            st.image(image, caption="Uploaded Image.", use_column_width=True)
+# print(os.getenv('AI_key'))
 
-if __name__ == "__main__":
-    main()
+def get_gpt_response(prompt):
+    response = client.chat.completions.create(
+      model="ft:gpt-3.5-turbo-0125:ueh::9DUn0U80",  
+      messages=[{"role": "system", "content": "You are cybersecurity specialist. Please answer any question concern about security problem!"}, {"role": "user", "content": prompt}],
+      max_tokens=150
+    )
+    return  response.choices[0].message.content
+
+
+
+
+
+# Tiêu đề của chatbox
+st.title("ChatGPT Streamlit Chatbox")
+
+# Khung nhập văn bản để người dùng nhập câu hỏi
+user_input = st.text_input("Bạn muốn nói gì?", "")
+
+# Nếu có input từ người dùng, gửi nó đến ChatGPT và hiển thị phản hồi
+if user_input:
+    response = get_gpt_response(user_input)
+    st.text_area("ChatGPT's response:", value=response, height=200, max_chars=150, key="response")
+
