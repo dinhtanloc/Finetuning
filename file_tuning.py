@@ -1,4 +1,7 @@
 import openai
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 def open_file(filepath):
     with open(filepath,'r',encoding='utf-8') as infile:
@@ -13,7 +16,7 @@ api_key = open_file('apikey3.txt')
 openai.api_key = api_key
 
 print(api_key)
-file_id = 'file-48MIikZVTuoqG4OCXvCuHazH'
+file_id = os.getenv('file_id')
 module_name = 'gpt-3.5-turbo'
 response = openai.FineTuningJob.create(
     training_file = file_id,
